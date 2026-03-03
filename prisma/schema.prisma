@@ -12,3 +12,83 @@ generator client {
 datasource db {
   provider = "postgresql"
 }
+
+model User {
+  id        String   @id @default(uuid())
+  email     String?  @unique
+  createdAt DateTime @default(now())
+
+  subjects Subject[]
+  studies  Study[]
+  goals    Goal[]
+  notes    Note[]
+}
+
+model Subject {
+  id     String @id @default(uuid())
+  name   String
+  userId String
+
+  user            User             @relation(fields: [userId], references: [id])
+  studies         Study[]
+  goalDaySubjects GoalDaySubject[]
+  notes           Note[]
+}
+
+model Study {
+  id        String   @id @default(uuid())
+  userId    String
+  subjectId String?
+  hours     Float
+  date      DateTime
+
+  user    User     @relation(fields: [userId], references: [id])
+  subject Subject? @relation(fields: [subjectId], references: [id])
+}
+
+model Goal {
+  id         String   @id @default(uuid())
+  userId     String
+  type       GoalType
+  totalHours Float
+  startDate  DateTime
+  endDate    DateTime
+
+  user User      @relation(fields: [userId], references: [id])
+  days GoalDay[]
+}
+
+enum GoalType {
+  WEEKLY
+  MONTHLY
+}
+
+model GoalDay {
+  id      String @id @default(uuid())
+  goalId  String
+  weekday Int // 1=Seg ... 7=Dom
+  hours   Float // horas daquele dia
+
+  goal     Goal             @relation(fields: [goalId], references: [id])
+  subjects GoalDaySubject[]
+}
+
+model GoalDaySubject {
+  id        String @id @default(uuid())
+  goalDayId String
+  subjectId String
+
+  goalDay GoalDay @relation(fields: [goalDayId], references: [id])
+  subject Subject @relation(fields: [subjectId], references: [id])
+}
+
+model Note {
+  id        String   @id @default(uuid())
+  userId    String
+  subjectId String?
+  content   String
+  createdAt DateTime @default(now())
+
+  user    User     @relation(fields: [userId], references: [id])
+  subject Subject? @relation(fields: [subjectId], references: [id])
+}
