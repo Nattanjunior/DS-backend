@@ -17,7 +17,7 @@ services:
     image: postgres:16.8-alpine3.20
     environment:
       POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: notifications-db
+      POSTGRES_DB: DS-db
     ports:
       - "5432:5432"
     volumes:
