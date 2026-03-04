@@ -12,8 +12,11 @@ import {
   noteQuerySchema,
   updateNoteSchema,
 } from '../schemas/noteSchema.js'
+import { authMiddleware } from '../middleware/authMiddleware.js'
 
 export async function noteRoutes(app: FastifyInstance) {
+  app.addHook('preHandler', authMiddleware)
+
   app.get(
     '/',
     {

@@ -12,8 +12,11 @@ import {
   subjectQuerySchema,
   updateSubjectSchema,
 } from '../schemas/subjectSchema.js'
+import { authMiddleware } from '../middleware/authMiddleware.js'
 
 export async function subjectRoutes(app: FastifyInstance) {
+  app.addHook('preHandler', authMiddleware)
+
   app.get(
     '/',
     {

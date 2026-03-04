@@ -3,7 +3,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.studyRoutes = studyRoutes;
 const studyController_js_1 = require("../controllers/studyController.js");
 const studySchema_js_1 = require("../schemas/studySchema.js");
+const authMiddleware_js_1 = require("../middleware/authMiddleware.js");
 async function studyRoutes(app) {
+    app.addHook('preHandler', authMiddleware_js_1.authMiddleware);
     app.get('/', {
         schema: {
             querystring: studySchema_js_1.studyQuerySchema,
