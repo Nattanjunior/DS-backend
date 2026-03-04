@@ -3,7 +3,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.noteRoutes = noteRoutes;
 const noteController_js_1 = require("../controllers/noteController.js");
 const noteSchema_js_1 = require("../schemas/noteSchema.js");
+const authMiddleware_js_1 = require("../middleware/authMiddleware.js");
 async function noteRoutes(app) {
+    app.addHook('preHandler', authMiddleware_js_1.authMiddleware);
     app.get('/', {
         schema: {
             querystring: noteSchema_js_1.noteQuerySchema,

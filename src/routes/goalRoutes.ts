@@ -12,8 +12,11 @@ import {
   goalQuerySchema,
   updateGoalSchema,
 } from '../schemas/goalSchema.js'
+import { authMiddleware } from '../middleware/authMiddleware.js'
 
 export async function goalRoutes(app: FastifyInstance) {
+  app.addHook('preHandler', authMiddleware)
+
   app.get(
     '/',
     {

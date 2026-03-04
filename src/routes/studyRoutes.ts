@@ -12,8 +12,11 @@ import {
   studyQuerySchema,
   updateStudySchema,
 } from '../schemas/studySchema.js'
+import { authMiddleware } from '../middleware/authMiddleware.js'
 
 export async function studyRoutes(app: FastifyInstance) {
+  app.addHook('preHandler', authMiddleware)
+
   app.get(
     '/',
     {
