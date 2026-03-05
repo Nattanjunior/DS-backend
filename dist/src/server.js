@@ -13,26 +13,8 @@ const goalRoutes_js_1 = require("./routes/goalRoutes.js");
 const noteRoutes_js_1 = require("./routes/noteRoutes.js");
 const userRoutes_js_1 = require("./routes/userRoutes.js");
 const authRoutes_js_1 = require("./routes/authRoutes.js");
-const isDevelopment = process.env.NODE_ENV !== 'production';
 const app = (0, fastify_1.default)({
-    logger: isDevelopment
-        ? {
-            level: 'debug',
-            transport: {
-                target: 'pino-pretty',
-                options: {
-                    colorize: true,
-                    translateTime: 'HH:MM:ss Z',
-                    ignore: 'pid,hostname',
-                },
-            },
-        }
-        : {
-            level: 'info',
-            formatters: {
-                level: (label) => ({ level: label }),
-            },
-        },
+    logger: true,
 });
 async function start() {
     if (!process.env.JWT_SECRET) {
@@ -62,15 +44,6 @@ async function start() {
     await app.register(goalRoutes_js_1.goalRoutes, { prefix: '/goals' });
     await app.register(noteRoutes_js_1.noteRoutes, { prefix: '/notes' });
     await app.register(userRoutes_js_1.userRoutes, { prefix: '/users' });
-    app.get('/health', async (request, reply) => {
-        const healthcheck = {
-            status: 'ok',
-            timestamp: new Date().toISOString(),
-            uptime: process.uptime(),
-            environment: process.env.NODE_ENV || 'development',
-        };
-        return reply.send(healthcheck);
-    });
     const port = Number(process.env.PORT) || 3000;
     app.listen({ port }, (err) => {
         if (err) {
