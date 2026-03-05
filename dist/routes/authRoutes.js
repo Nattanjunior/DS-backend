@@ -15,6 +15,16 @@ async function authRoutes(app) {
             body: userSchema_js_1.loginUserSchema,
         },
     }, authController_js_1.login);
+    app.post('/forgot-password', {
+        schema: {
+            body: userSchema_js_1.forgotPasswordSchema,
+        },
+    }, authController_js_1.forgotPassword);
+    app.post('/reset-password', {
+        schema: {
+            body: userSchema_js_1.resetPasswordSchema,
+        },
+    }, authController_js_1.resetPassword);
     app.get('/me', {
         preHandler: [authMiddleware_js_1.authMiddleware],
     }, authController_js_1.me);

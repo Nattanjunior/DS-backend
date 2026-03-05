@@ -85,4 +85,12 @@ export const userService = {
       where: { id },
     })
   },
+
+  async updatePassword(id: string, newPassword: string) {
+    const hashedPassword = await this.hashPassword(newPassword)
+    return prisma.user.update({
+      where: { id },
+      data: { password: hashedPassword },
+    })
+  },
 }

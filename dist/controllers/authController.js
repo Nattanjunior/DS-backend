@@ -3,6 +3,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.register = register;
 exports.login = login;
 exports.me = me;
+exports.forgotPassword = forgotPassword;
+exports.resetPassword = resetPassword;
 const authService_js_1 = require("../services/authService.js");
 const userService_js_1 = require("../services/userService.js");
 async function register(request, reply) {
@@ -38,4 +40,24 @@ async function me(request, reply) {
             createdAt: user.createdAt,
         },
     });
+}
+async function forgotPassword(request, reply) {
+    try {
+        const result = await authService_js_1.authService.forgotPassword(request.body);
+        return reply.send(result);
+    }
+    catch (error) {
+        const message = error instanceof Error ? error.message : 'Erro ao processar solicitação';
+        return reply.status(400).send({ error: message });
+    }
+}
+async function resetPassword(request, reply) {
+    try {
+        const result = await authService_js_1.authService.resetPassword(request.body);
+        return reply.send(result);
+    }
+    catch (error) {
+        const message = error instanceof Error ? error.message : 'Erro ao redefinir senha';
+        return reply.status(400).send({ error: message });
+    }
 }
