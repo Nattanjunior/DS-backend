@@ -1,7 +1,7 @@
 import { FastifyReply, FastifyRequest } from 'fastify'
 import { authService } from '../services/authService.js'
 import { userService } from '../services/userService.js'
-import { RegisterUserInput, LoginUserInput } from '../schemas/userSchema.js'
+import { RegisterUserInput, LoginUserInput, ForgotPasswordInput, ResetPasswordInput } from '../schemas/userSchema.js'
 
 export async function register(
   request: FastifyRequest<{ Body: RegisterUserInput }>,
@@ -48,4 +48,30 @@ export async function me(
       createdAt: user.createdAt,
     },
   })
+}
+
+export async function forgotPassword(
+  request: FastifyRequest<{ Body: ForgotPasswordInput }>,
+  reply: FastifyReply
+) {
+  try {
+    const result = await authService.forgotPassword(request.body)
+    return reply.send(result)
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Erro ao processar solicitação'
+    return reply.status(400).send({ error: message })
+  }
+}
+
+export async function resetPassword(
+  request: FastifyRequest<{ Body: ResetPasswordInput }>,
+  reply: FastifyReply
+) {
+  try {
+    const result = await authService.resetPassword(request.body)
+    return reply.send(result)
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Erro ao redefinir senha'
+    return reply.status(400).send({ error: message })
+  }
 }
