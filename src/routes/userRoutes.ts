@@ -1,18 +1,12 @@
 import { FastifyInstance } from 'fastify'
-import {
-  createUser,
-  deleteUser,
-  getUserById,
-  getUsers,
-  updateUser,
-} from '../controllers/userController.js'
+import { userController } from '../controllers/userController'
 import {
   createUserSchema,
   userParamsSchema,
   userQuerySchema,
   updateUserSchema,
-} from '../schemas/userSchema.js'
-import { authMiddleware } from '../middleware/authMiddleware.js'
+} from '../schemas/userSchema'
+import { authMiddleware } from '../middleware/authMiddleware'
 
 export async function userRoutes(app: FastifyInstance) {
   app.addHook('preHandler', authMiddleware)
@@ -24,7 +18,7 @@ export async function userRoutes(app: FastifyInstance) {
         querystring: userQuerySchema,
       },
     },
-    getUsers
+    userController.getUsers.bind(userController)
   )
 
   app.get(
@@ -34,7 +28,7 @@ export async function userRoutes(app: FastifyInstance) {
         params: userParamsSchema,
       },
     },
-    getUserById
+    userController.getUserById.bind(userController)
   )
 
   app.post(
@@ -44,7 +38,7 @@ export async function userRoutes(app: FastifyInstance) {
         body: createUserSchema,
       },
     },
-    createUser
+    userController.createUser.bind(userController)
   )
 
   app.put(
@@ -55,7 +49,7 @@ export async function userRoutes(app: FastifyInstance) {
         body: updateUserSchema,
       },
     },
-    updateUser
+    userController.updateUser.bind(userController)
   )
 
   app.delete(
@@ -65,6 +59,6 @@ export async function userRoutes(app: FastifyInstance) {
         params: userParamsSchema,
       },
     },
-    deleteUser
+    userController.deleteUser.bind(userController)
   )
 }

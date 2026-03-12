@@ -1,47 +1,68 @@
 import { FastifyInstance } from 'fastify'
-import { register, login, me, forgotPassword, resetPassword } from '../controllers/authController.js'
-import { authMiddleware } from '../middleware/authMiddleware.js'
-import { registerUserSchema, loginUserSchema, forgotPasswordSchema, resetPasswordSchema } from '../schemas/userSchema.js'
+import { authController } from '../controllers/authController'
+import { authMiddleware } from '../middleware/authMiddleware'
 
 export async function authRoutes(app: FastifyInstance) {
   app.post(
     '/register',
     {
-      schema: {
-        body: registerUserSchema,
-      },
+      schema: { 
+        body: 
+        { type: "object", 
+          required: ["email", "password"], 
+          properties: { name: { type: "string" }, 
+          email: { type: "string", format: "email" }, 
+          password: { type: "string", minLength: 6 } 
+        } 
+      } 
+    }
     },
-    register
+    authController.register.bind(authController)
   )
 
   app.post(
     '/login',
     {
-      schema: {
-        body: loginUserSchema,
-      },
+      schema: { 
+        body: 
+        { type: "object", 
+          required: ["email", "password"], 
+          properties: { 
+            email: { type: "string", format: "email" }, 
+            password: { type: "string", minLength: 6 } 
+        } 
+      } 
+    }
     },
-    login
+    authController.login.bind(authController)
   )
 
   app.post(
     '/forgot-password',
     {
-      schema: {
-        body: forgotPasswordSchema,
-      },
+      schema: { 
+        body: 
+        { type: "object", 
+          required: ["email"], 
+          properties: { email: { type: "string", format: "email" }} 
+      } 
+    }
     },
-    forgotPassword
+    authController.forgotPassword.bind(authController)
   )
 
   app.post(
     '/reset-password',
     {
-      schema: {
-        body: resetPasswordSchema,
-      },
+      schema: { 
+        body: 
+        { type: "object", 
+          required: ["password"], 
+          properties: { password: { type: "string", minLength: 6 }} 
+       } 
+    }
     },
-    resetPassword
+    authController.resetPassword.bind(authController)
   )
 
   app.get(
@@ -49,6 +70,6 @@ export async function authRoutes(app: FastifyInstance) {
     {
       preHandler: [authMiddleware],
     },
-    me
+    authController.me.bind(authController)
   )
 }

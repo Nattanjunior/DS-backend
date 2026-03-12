@@ -1,35 +1,35 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.goalRoutes = goalRoutes;
-const goalController_js_1 = require("../controllers/goalController.js");
-const goalSchema_js_1 = require("../schemas/goalSchema.js");
-const authMiddleware_js_1 = require("../middleware/authMiddleware.js");
+const goalController_1 = require("../controllers/goalController");
+const goalSchema_1 = require("../schemas/goalSchema");
+const authMiddleware_1 = require("../middleware/authMiddleware");
 async function goalRoutes(app) {
-    app.addHook('preHandler', authMiddleware_js_1.authMiddleware);
+    app.addHook('preHandler', authMiddleware_1.authMiddleware);
     app.get('/', {
         schema: {
-            querystring: goalSchema_js_1.goalQuerySchema,
+            querystring: goalSchema_1.goalQuerySchema,
         },
-    }, goalController_js_1.getGoals);
+    }, goalController_1.goalController.getGoals.bind(goalController_1.goalController));
     app.get('/:id', {
         schema: {
-            params: goalSchema_js_1.goalParamsSchema,
+            params: goalSchema_1.goalParamsSchema,
         },
-    }, goalController_js_1.getGoalById);
+    }, goalController_1.goalController.getGoalById.bind(goalController_1.goalController));
     app.post('/', {
         schema: {
-            body: goalSchema_js_1.createGoalSchema,
+            body: goalSchema_1.createGoalSchema,
         },
-    }, goalController_js_1.createGoal);
+    }, goalController_1.goalController.createGoal.bind(goalController_1.goalController));
     app.put('/:id', {
         schema: {
-            params: goalSchema_js_1.goalParamsSchema,
-            body: goalSchema_js_1.updateGoalSchema,
+            params: goalSchema_1.goalParamsSchema,
+            body: goalSchema_1.updateGoalSchema,
         },
-    }, goalController_js_1.updateGoal);
+    }, goalController_1.goalController.updateGoal.bind(goalController_1.goalController));
     app.delete('/:id', {
         schema: {
-            params: goalSchema_js_1.goalParamsSchema,
+            params: goalSchema_1.goalParamsSchema,
         },
-    }, goalController_js_1.deleteGoal);
+    }, goalController_1.goalController.deleteGoal.bind(goalController_1.goalController));
 }
