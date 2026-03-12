@@ -3,12 +3,13 @@ import fastify from 'fastify'
 import cors from '@fastify/cors'
 import fastifyJwt from '@fastify/jwt'
 import rateLimit from '@fastify/rate-limit'
-import { authRoutes } from '../src/routes/authRoutes.js'
-import { subjectRoutes } from '../src/routes/subjectRoutes.js'
-import { studyRoutes } from '../src/routes/studyRoutes.js'
-import { goalRoutes } from '../src/routes/goalRoutes.js'
-import { noteRoutes } from '../src/routes/noteRoutes.js'
-import { userRoutes } from '../src/routes/userRoutes.js'
+import { validatorCompiler, serializerCompiler } from 'fastify-type-provider-zod'
+import { authRoutes } from '../src/routes/authRoutes'
+import { subjectRoutes } from '../src/routes/subjectRoutes'
+import { studyRoutes } from '../src/routes/studyRoutes'
+import { goalRoutes } from '../src/routes/goalRoutes'
+import { noteRoutes } from '../src/routes/noteRoutes'
+import { userRoutes } from '../src/routes/userRoutes'
 import { PrismaClient } from '@prisma/client'
 
 declare module '@fastify/jwt' {
@@ -28,6 +29,9 @@ export const prisma = new PrismaClient({
 
 export async function buildTestApp(): Promise<FastifyInstance> {
   const app = fastify({ logger: false })
+
+  app.setValidatorCompiler(validatorCompiler)
+  app.setSerializerCompiler(serializerCompiler)
 
   const testJwtSecret = 'test-jwt-secret-for-integration-tests'
 
