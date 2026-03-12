@@ -1,18 +1,12 @@
 import { FastifyInstance } from 'fastify'
-import {
-  createGoal,
-  deleteGoal,
-  getGoalById,
-  getGoals,
-  updateGoal,
-} from '../controllers/goalController.js'
+import { goalController } from '../controllers/goalController'
 import {
   createGoalSchema,
   goalParamsSchema,
   goalQuerySchema,
   updateGoalSchema,
-} from '../schemas/goalSchema.js'
-import { authMiddleware } from '../middleware/authMiddleware.js'
+} from '../schemas/goalSchema'
+import { authMiddleware } from '../middleware/authMiddleware'
 
 export async function goalRoutes(app: FastifyInstance) {
   app.addHook('preHandler', authMiddleware)
@@ -24,7 +18,7 @@ export async function goalRoutes(app: FastifyInstance) {
         querystring: goalQuerySchema,
       },
     },
-    getGoals
+    goalController.getGoals.bind(goalController)
   )
 
   app.get(
@@ -34,7 +28,7 @@ export async function goalRoutes(app: FastifyInstance) {
         params: goalParamsSchema,
       },
     },
-    getGoalById
+    goalController.getGoalById.bind(goalController)
   )
 
   app.post(
@@ -44,7 +38,7 @@ export async function goalRoutes(app: FastifyInstance) {
         body: createGoalSchema,
       },
     },
-    createGoal
+    goalController.createGoal.bind(goalController)
   )
 
   app.put(
@@ -55,7 +49,7 @@ export async function goalRoutes(app: FastifyInstance) {
         body: updateGoalSchema,
       },
     },
-    updateGoal
+    goalController.updateGoal.bind(goalController)
   )
 
   app.delete(
@@ -65,6 +59,6 @@ export async function goalRoutes(app: FastifyInstance) {
         params: goalParamsSchema,
       },
     },
-    deleteGoal
+    goalController.deleteGoal.bind(goalController)
   )
 }

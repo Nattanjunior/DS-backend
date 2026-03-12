@@ -1,35 +1,35 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.noteRoutes = noteRoutes;
-const noteController_js_1 = require("../controllers/noteController.js");
-const noteSchema_js_1 = require("../schemas/noteSchema.js");
-const authMiddleware_js_1 = require("../middleware/authMiddleware.js");
+const noteController_1 = require("../controllers/noteController");
+const noteSchema_1 = require("../schemas/noteSchema");
+const authMiddleware_1 = require("../middleware/authMiddleware");
 async function noteRoutes(app) {
-    app.addHook('preHandler', authMiddleware_js_1.authMiddleware);
+    app.addHook('preHandler', authMiddleware_1.authMiddleware);
     app.get('/', {
         schema: {
-            querystring: noteSchema_js_1.noteQuerySchema,
+            querystring: noteSchema_1.noteQuerySchema,
         },
-    }, noteController_js_1.getNotes);
+    }, noteController_1.noteController.getNotes.bind(noteController_1.noteController));
     app.get('/:id', {
         schema: {
-            params: noteSchema_js_1.noteParamsSchema,
+            params: noteSchema_1.noteParamsSchema,
         },
-    }, noteController_js_1.getNoteById);
+    }, noteController_1.noteController.getNoteById.bind(noteController_1.noteController));
     app.post('/', {
         schema: {
-            body: noteSchema_js_1.createNoteSchema,
+            body: noteSchema_1.createNoteSchema,
         },
-    }, noteController_js_1.createNote);
+    }, noteController_1.noteController.createNote.bind(noteController_1.noteController));
     app.put('/:id', {
         schema: {
-            params: noteSchema_js_1.noteParamsSchema,
-            body: noteSchema_js_1.updateNoteSchema,
+            params: noteSchema_1.noteParamsSchema,
+            body: noteSchema_1.updateNoteSchema,
         },
-    }, noteController_js_1.updateNote);
+    }, noteController_1.noteController.updateNote.bind(noteController_1.noteController));
     app.delete('/:id', {
         schema: {
-            params: noteSchema_js_1.noteParamsSchema,
+            params: noteSchema_1.noteParamsSchema,
         },
-    }, noteController_js_1.deleteNote);
+    }, noteController_1.noteController.deleteNote.bind(noteController_1.noteController));
 }

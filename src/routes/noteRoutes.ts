@@ -1,18 +1,12 @@
 import { FastifyInstance } from 'fastify'
-import {
-  createNote,
-  deleteNote,
-  getNoteById,
-  getNotes,
-  updateNote,
-} from '../controllers/noteController.js'
+import { noteController } from '../controllers/noteController'
 import {
   createNoteSchema,
   noteParamsSchema,
   noteQuerySchema,
   updateNoteSchema,
-} from '../schemas/noteSchema.js'
-import { authMiddleware } from '../middleware/authMiddleware.js'
+} from '../schemas/noteSchema'
+import { authMiddleware } from '../middleware/authMiddleware'
 
 export async function noteRoutes(app: FastifyInstance) {
   app.addHook('preHandler', authMiddleware)
@@ -24,7 +18,7 @@ export async function noteRoutes(app: FastifyInstance) {
         querystring: noteQuerySchema,
       },
     },
-    getNotes
+    noteController.getNotes.bind(noteController)
   )
 
   app.get(
@@ -34,7 +28,7 @@ export async function noteRoutes(app: FastifyInstance) {
         params: noteParamsSchema,
       },
     },
-    getNoteById
+    noteController.getNoteById.bind(noteController)
   )
 
   app.post(
@@ -44,7 +38,7 @@ export async function noteRoutes(app: FastifyInstance) {
         body: createNoteSchema,
       },
     },
-    createNote
+    noteController.createNote.bind(noteController)
   )
 
   app.put(
@@ -55,7 +49,7 @@ export async function noteRoutes(app: FastifyInstance) {
         body: updateNoteSchema,
       },
     },
-    updateNote
+    noteController.updateNote.bind(noteController)
   )
 
   app.delete(
@@ -65,6 +59,6 @@ export async function noteRoutes(app: FastifyInstance) {
         params: noteParamsSchema,
       },
     },
-    deleteNote
+    noteController.deleteNote.bind(noteController)
   )
 }

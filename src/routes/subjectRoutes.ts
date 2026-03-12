@@ -1,18 +1,11 @@
 import { FastifyInstance } from 'fastify'
+import { subjectController } from '../controllers/subjectController'
 import {
-  createSubject,
-  deleteSubject,
-  getSubjectById,
-  getSubjects,
-  updateSubject,
-} from '../controllers/subjectController.js'
-import {
-  createSubjectSchema,
   subjectParamsSchema,
   subjectQuerySchema,
   updateSubjectSchema,
-} from '../schemas/subjectSchema.js'
-import { authMiddleware } from '../middleware/authMiddleware.js'
+} from '../schemas/subjectSchema'
+import { authMiddleware } from '../middleware/authMiddleware'
 
 export async function subjectRoutes(app: FastifyInstance) {
   app.addHook('preHandler', authMiddleware)
@@ -24,7 +17,7 @@ export async function subjectRoutes(app: FastifyInstance) {
         querystring: subjectQuerySchema,
       },
     },
-    getSubjects
+    subjectController.getSubjects.bind(subjectController)
   )
 
   app.get(
@@ -34,17 +27,23 @@ export async function subjectRoutes(app: FastifyInstance) {
         params: subjectParamsSchema,
       },
     },
-    getSubjectById
+    subjectController.getSubjectById.bind(subjectController)
   )
 
   app.post(
     '/',
     {
-      schema: {
-        body: createSubjectSchema,
-      },
+      schema: { 
+        body: 
+        { type: "object", 
+          required: ["name"], 
+          properties: { 
+            name: { type: "string" }
+          } 
+        } 
+      }
     },
-    createSubject
+    subjectController.createSubject.bind(subjectController)
   )
 
   app.put(
@@ -55,7 +54,7 @@ export async function subjectRoutes(app: FastifyInstance) {
         body: updateSubjectSchema,
       },
     },
-    updateSubject
+    subjectController.updateSubject.bind(subjectController)
   )
 
   app.delete(
@@ -65,6 +64,6 @@ export async function subjectRoutes(app: FastifyInstance) {
         params: subjectParamsSchema,
       },
     },
-    deleteSubject
+    subjectController.deleteSubject.bind(subjectController)
   )
 }

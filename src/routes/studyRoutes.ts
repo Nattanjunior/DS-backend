@@ -1,18 +1,12 @@
 import { FastifyInstance } from 'fastify'
-import {
-  createStudy,
-  deleteStudy,
-  getStudyById,
-  getStudies,
-  updateStudy,
-} from '../controllers/studyController.js'
+import { studyController } from '../controllers/studyController'
 import {
   createStudySchema,
   studyParamsSchema,
   studyQuerySchema,
   updateStudySchema,
-} from '../schemas/studySchema.js'
-import { authMiddleware } from '../middleware/authMiddleware.js'
+} from '../schemas/studySchema'
+import { authMiddleware } from '../middleware/authMiddleware'
 
 export async function studyRoutes(app: FastifyInstance) {
   app.addHook('preHandler', authMiddleware)
@@ -24,7 +18,7 @@ export async function studyRoutes(app: FastifyInstance) {
         querystring: studyQuerySchema,
       },
     },
-    getStudies
+    studyController.getStudies.bind(studyController)
   )
 
   app.get(
@@ -34,7 +28,7 @@ export async function studyRoutes(app: FastifyInstance) {
         params: studyParamsSchema,
       },
     },
-    getStudyById
+    studyController.getStudyById.bind(studyController)
   )
 
   app.post(
@@ -44,7 +38,7 @@ export async function studyRoutes(app: FastifyInstance) {
         body: createStudySchema,
       },
     },
-    createStudy
+    studyController.createStudy.bind(studyController)
   )
 
   app.put(
@@ -55,7 +49,7 @@ export async function studyRoutes(app: FastifyInstance) {
         body: updateStudySchema,
       },
     },
-    updateStudy
+    studyController.updateStudy.bind(studyController)
   )
 
   app.delete(
@@ -65,6 +59,6 @@ export async function studyRoutes(app: FastifyInstance) {
         params: studyParamsSchema,
       },
     },
-    deleteStudy
+    studyController.deleteStudy.bind(studyController)
   )
 }
