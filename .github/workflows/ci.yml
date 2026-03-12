@@ -92,6 +92,11 @@ jobs:
         env:
           DATABASE_URL: postgres://postgres:postgres@localhost:5432/DS-db-test
 
+      - name: Push database schema
+        run: npm run db:push
+        env:
+          DATABASE_URL: postgres://postgres:postgres@localhost:5432/DS-db-test
+
       - name: Run tests
         run: npm test
         env:
