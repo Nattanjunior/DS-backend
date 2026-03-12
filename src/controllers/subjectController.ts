@@ -12,7 +12,6 @@ export class SubjectController {
     request: FastifyRequest<{ Querystring: SubjectQuery }>,
     reply: FastifyReply
   ) {
-    const userId = request.user?.userId
     const subjects = await subjectService.findAll()
     return reply.send({ data: subjects })
   }
@@ -35,6 +34,9 @@ export class SubjectController {
     reply: FastifyReply
   ) {
     const userId = request.user?.userId
+    if (!userId) {
+      return reply.status(401).send({ error: 'Usuário não autenticado' })
+    }
     const subject = await subjectService.create(request.body, userId)
     return reply.status(201).send({ data: subject })
   }

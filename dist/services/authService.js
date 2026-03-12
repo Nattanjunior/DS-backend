@@ -1,16 +1,28 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.authService = void 0;
-const userService_js_1 = require("./userService.js");
+exports.authService = exports.AuthService = void 0;
+const prisma_1 = require("../lib/prisma");
+const userService_1 = require("./userService");
 const crypto_1 = require("crypto");
 const passwordResets = new Map();
-exports.authService = {
+class AuthService {
+    constructor(prisma) {
+        this.prisma = prisma;
+    }
     async register(data, fastify) {
-        const existingUser = await userService_js_1.userService.findByEmail(data.email);
+        const existingUser = await this.prisma.user.findUnique({
+            where: { email: data.email }
+        });
         if (existingUser) {
             throw new Error('Email já cadastrado');
         }
-        const user = await userService_js_1.userService.createWithPassword(data.email, data.password);
+        const hashedPassword = await userService_1.userService.hashPassword(data.password);
+        const user = await this.prisma.user.create({
+            data: {
+                email: data.email,
+                password: hashedPassword,
+            },
+        });
         const payload = {
             userId: user.id,
             email: user.email || '',
@@ -24,16 +36,18 @@ exports.authService = {
             },
             accessToken,
         };
-    },
+    }
     async login(data, fastify) {
-        const user = await userService_js_1.userService.findByEmailWithPassword(data.email);
+        const user = await this.prisma.user.findUnique({
+            where: { email: data.email }
+        });
         if (!user) {
             throw new Error('Credenciais inválidas');
         }
         if (!user.password) {
             throw new Error('Credenciais inválidas');
         }
-        const isValidPassword = await userService_js_1.userService.comparePassword(data.password, user.password);
+        const isValidPassword = await userService_1.userService.comparePassword(data.password, user.password);
         if (!isValidPassword) {
             throw new Error('Credenciais inválidas');
         }
@@ -50,9 +64,11 @@ exports.authService = {
             },
             accessToken,
         };
-    },
+    }
     async forgotPassword(data) {
-        const user = await userService_js_1.userService.findByEmail(data.email);
+        const user = await this.prisma.user.findUnique({
+            where: { email: data.email }
+        });
         if (!user) {
             return { message: 'Se o email existir, um link de recuperação será enviado' };
         }
@@ -67,7 +83,7 @@ exports.authService = {
             message: 'Se o email existir, um link de recuperação será enviado',
             resetToken: token,
         };
-    },
+    }
     async resetPassword(data) {
         const resetData = passwordResets.get(data.token);
         if (!resetData) {
@@ -77,12 +93,20 @@ exports.authService = {
             passwordResets.delete(data.token);
             throw new Error('Token expirado');
         }
-        const user = await userService_js_1.userService.findById(resetData.userId);
+        const user = await this.prisma.user.findUnique({
+            where: { id: resetData.userId }
+        });
         if (!user) {
             throw new Error('Usuário não encontrado');
         }
-        await userService_js_1.userService.updatePassword(user.id, data.newPassword);
+        const hashedPassword = await userService_1.userService.hashPassword(data.newPassword);
+        await this.prisma.user.update({
+            where: { id: user.id },
+            data: { password: hashedPassword },
+        });
         passwordResets.delete(data.token);
         return { message: 'Senha atualizada com sucesso' };
-    },
-};
+    }
+}
+exports.AuthService = AuthService;
+exports.authService = new AuthService(prisma_1.Prisma);

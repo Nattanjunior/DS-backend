@@ -1,8 +1,11 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.noteService = void 0;
-const prisma_js_1 = require("../lib/prisma.js");
-exports.noteService = {
+exports.noteService = exports.NoteService = void 0;
+const prisma_1 = require("../lib/prisma");
+class NoteService {
+    constructor(prisma) {
+        this.prisma = prisma;
+    }
     async findAll(query) {
         const where = {};
         if (query.userId)
@@ -16,20 +19,20 @@ exports.noteService = {
             if (query.dateTo)
                 where.createdAt.lte = query.dateTo;
         }
-        return prisma_js_1.prisma.note.findMany({
+        return this.prisma.note.findMany({
             where,
             include: { subject: true },
             orderBy: { createdAt: 'desc' },
         });
-    },
+    }
     async findById(id) {
-        return prisma_js_1.prisma.note.findUnique({
+        return this.prisma.note.findUnique({
             where: { id },
             include: { subject: true },
         });
-    },
+    }
     async create(data) {
-        return prisma_js_1.prisma.note.create({
+        return this.prisma.note.create({
             data: {
                 userId: data.userId,
                 subjectId: data.subjectId,
@@ -37,17 +40,19 @@ exports.noteService = {
             },
             include: { subject: true },
         });
-    },
+    }
     async update(id, data) {
-        return prisma_js_1.prisma.note.update({
+        return this.prisma.note.update({
             where: { id },
             data,
             include: { subject: true },
         });
-    },
+    }
     async delete(id) {
-        return prisma_js_1.prisma.note.delete({
+        return this.prisma.note.delete({
             where: { id },
         });
-    },
-};
+    }
+}
+exports.NoteService = NoteService;
+exports.noteService = new NoteService(prisma_1.Prisma);

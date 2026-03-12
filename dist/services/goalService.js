@@ -1,8 +1,11 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.goalService = void 0;
-const prisma_js_1 = require("../lib/prisma.js");
-exports.goalService = {
+exports.goalService = exports.GoalService = void 0;
+const prisma_1 = require("../lib/prisma");
+class GoalService {
+    constructor(prisma) {
+        this.prisma = prisma;
+    }
     async findAll(query) {
         const where = {};
         if (query.userId)
@@ -17,7 +20,7 @@ exports.goalService = {
             if (query.endDate)
                 where.endDate.gte = query.endDate;
         }
-        return prisma_js_1.prisma.goal.findMany({
+        return this.prisma.goal.findMany({
             where,
             include: {
                 days: {
@@ -30,9 +33,9 @@ exports.goalService = {
             },
             orderBy: { startDate: 'desc' },
         });
-    },
+    }
     async findById(id) {
-        return prisma_js_1.prisma.goal.findUnique({
+        return this.prisma.goal.findUnique({
             where: { id },
             include: {
                 days: {
@@ -44,10 +47,10 @@ exports.goalService = {
                 },
             },
         });
-    },
+    }
     async create(data) {
         const { userId, type, totalHours, startDate, endDate, days } = data;
-        return prisma_js_1.prisma.goal.create({
+        return this.prisma.goal.create({
             data: {
                 userId,
                 type,
@@ -78,18 +81,18 @@ exports.goalService = {
                 },
             },
         });
-    },
+    }
     async update(id, data) {
         const { type, totalHours, startDate, endDate, days } = data;
         if (days) {
-            await prisma_js_1.prisma.goalDaySubject.deleteMany({
+            await this.prisma.goalDaySubject.deleteMany({
                 where: { goalDay: { goalId: id } },
             });
-            await prisma_js_1.prisma.goalDay.deleteMany({
+            await this.prisma.goalDay.deleteMany({
                 where: { goalId: id },
             });
         }
-        return prisma_js_1.prisma.goal.update({
+        return this.prisma.goal.update({
             where: { id },
             data: {
                 type,
@@ -122,16 +125,18 @@ exports.goalService = {
                 },
             },
         });
-    },
+    }
     async delete(id) {
-        await prisma_js_1.prisma.goalDaySubject.deleteMany({
+        await this.prisma.goalDaySubject.deleteMany({
             where: { goalDay: { goalId: id } },
         });
-        await prisma_js_1.prisma.goalDay.deleteMany({
+        await this.prisma.goalDay.deleteMany({
             where: { goalId: id },
         });
-        return prisma_js_1.prisma.goal.delete({
+        return this.prisma.goal.delete({
             where: { id },
         });
-    },
-};
+    }
+}
+exports.GoalService = GoalService;
+exports.goalService = new GoalService(prisma_1.Prisma);

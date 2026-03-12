@@ -1,44 +1,50 @@
-import { prisma } from '../lib/prisma.js'
-import { CreateSubjectInput, UpdateSubjectInput, SubjectQuery } from '../schemas/subjectSchema.js'
+import { PrismaClient } from '@prisma/client'
+import { Prisma } from '../lib/prisma'
+import { CreateSubjectInput, UpdateSubjectInput } from '../schemas/subjectSchema'
 
-export const subjectService = {
-  async findAll(query: SubjectQuery) {
-    const where: Record<string, unknown> = {}
+export class SubjectService {
+  constructor(private prisma: PrismaClient) {}
 
-    if (query.userId) where.userId = query.userId
-    if (query.name) where.name = { contains: query.name, mode: 'insensitive' }
-
-    return prisma.subject.findMany({
-      where,
+  async findAll() {
+    return this.prisma.subject.findMany({
       orderBy: { name: 'asc' },
     })
-  },
+  }
 
   async findById(id: string) {
-    return prisma.subject.findUnique({
+    return this.prisma.subject.findUnique({
       where: { id },
     })
-  },
+  }
 
-  async create(data: CreateSubjectInput) {
-    return prisma.subject.create({
+  async findByUserId(userId: string) {
+    return this.prisma.subject.findMany({
+      where: { userId },
+      orderBy: { name: 'asc' },
+    })
+  }
+
+  async create(data: CreateSubjectInput, userId: string) {
+    return this.prisma.subject.create({
       data: {
         name: data.name,
-        userId: data.userId,
+        userId: userId,
       },
     })
-  },
+  }
 
   async update(id: string, data: UpdateSubjectInput) {
-    return prisma.subject.update({
+    return this.prisma.subject.update({
       where: { id },
       data,
     })
-  },
+  }
 
   async delete(id: string) {
-    return prisma.subject.delete({
+    return this.prisma.subject.delete({
       where: { id },
     })
-  },
+  }
 }
+
+export const subjectService = new SubjectService(Prisma)

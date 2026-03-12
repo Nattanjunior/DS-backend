@@ -4,10 +4,7 @@ exports.subjectController = exports.SubjectController = void 0;
 const subjectService_1 = require("../services/subjectService");
 class SubjectController {
     async getSubjects(request, reply) {
-        const userId = request.user?.userId;
-        const subjects = userId
-            ? await subjectService_1.subjectService.findByUserId(userId)
-            : await subjectService_1.subjectService.findAll();
+        const subjects = await subjectService_1.subjectService.findAll();
         return reply.send({ data: subjects });
     }
     async getSubjectById(request, reply) {
@@ -19,6 +16,9 @@ class SubjectController {
     }
     async createSubject(request, reply) {
         const userId = request.user?.userId;
+        if (!userId) {
+            return reply.status(401).send({ error: 'Usuário não autenticado' });
+        }
         const subject = await subjectService_1.subjectService.create(request.body, userId);
         return reply.status(201).send({ data: subject });
     }

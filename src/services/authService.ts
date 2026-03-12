@@ -1,6 +1,7 @@
 import { FastifyInstance } from 'fastify'
-import { userService } from './userService.js'
-import { RegisterUserInput, LoginUserInput, ForgotPasswordInput, ResetPasswordInput } from '../schemas/userSchema.js'
+import { Prisma } from '../lib/prisma'
+import { userService } from './userService'
+import { RegisterUserInput, LoginUserInput, ForgotPasswordInput, ResetPasswordInput } from '../schemas/userSchema'
 import { randomBytes } from 'crypto'
 
 interface AuthPayload {
@@ -16,14 +17,25 @@ interface PasswordResetToken {
 
 const passwordResets = new Map<string, PasswordResetToken>()
 
-export const authService = {
+export class AuthService {
+  constructor(private prisma: typeof Prisma) {}
+
   async register(data: RegisterUserInput, fastify: FastifyInstance) {
-    const existingUser = await userService.findByEmail(data.email)
+    const existingUser = await this.prisma.user.findUnique({
+      where: { email: data.email }
+    })
+    
     if (existingUser) {
       throw new Error('Email já cadastrado')
     }
 
-    const user = await userService.createWithPassword(data.email, data.password)
+    const hashedPassword = await userService.hashPassword(data.password)
+    const user = await this.prisma.user.create({
+      data: {
+        email: data.email,
+        password: hashedPassword,
+      },
+    })
 
     const payload: AuthPayload = {
       userId: user.id,
@@ -40,10 +52,13 @@ export const authService = {
       },
       accessToken,
     }
-  },
+  }
 
   async login(data: LoginUserInput, fastify: FastifyInstance) {
-    const user = await userService.findByEmailWithPassword(data.email)
+    const user = await this.prisma.user.findUnique({
+      where: { email: data.email }
+    })
+    
     if (!user) {
       throw new Error('Credenciais inválidas')
     }
@@ -72,10 +87,12 @@ export const authService = {
       },
       accessToken,
     }
-  },
+  }
 
   async forgotPassword(data: ForgotPasswordInput) {
-    const user = await userService.findByEmail(data.email)
+    const user = await this.prisma.user.findUnique({
+      where: { email: data.email }
+    })
     
     if (!user) {
       return { message: 'Se o email existir, um link de recuperação será enviado' }
@@ -94,7 +111,7 @@ export const authService = {
       message: 'Se o email existir, um link de recuperação será enviado',
       resetToken: token,
     }
-  },
+  }
 
   async resetPassword(data: ResetPasswordInput) {
     const resetData = passwordResets.get(data.token)
@@ -108,14 +125,23 @@ export const authService = {
       throw new Error('Token expirado')
     }
 
-    const user = await userService.findById(resetData.userId)
+    const user = await this.prisma.user.findUnique({
+      where: { id: resetData.userId }
+    })
+    
     if (!user) {
       throw new Error('Usuário não encontrado')
     }
 
-    await userService.updatePassword(user.id, data.newPassword)
+    const hashedPassword = await userService.hashPassword(data.newPassword)
+    await this.prisma.user.update({
+      where: { id: user.id },
+      data: { password: hashedPassword },
+    })
     passwordResets.delete(data.token)
 
     return { message: 'Senha atualizada com sucesso' }
-  },
+  }
 }
+
+export const authService = new AuthService(Prisma)

@@ -1,8 +1,11 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.studyService = void 0;
-const prisma_js_1 = require("../lib/prisma.js");
-exports.studyService = {
+exports.studyService = exports.StudyService = void 0;
+const prisma_1 = require("../lib/prisma");
+class StudyService {
+    constructor(prisma) {
+        this.prisma = prisma;
+    }
     async findAll(query) {
         const where = {};
         if (query.userId)
@@ -16,20 +19,20 @@ exports.studyService = {
             if (query.dateTo)
                 where.date.lte = query.dateTo;
         }
-        return prisma_js_1.prisma.study.findMany({
+        return this.prisma.study.findMany({
             where,
             include: { subject: true },
             orderBy: { date: 'desc' },
         });
-    },
+    }
     async findById(id) {
-        return prisma_js_1.prisma.study.findUnique({
+        return this.prisma.study.findUnique({
             where: { id },
             include: { subject: true },
         });
-    },
+    }
     async create(data) {
-        return prisma_js_1.prisma.study.create({
+        return this.prisma.study.create({
             data: {
                 userId: data.userId,
                 subjectId: data.subjectId,
@@ -38,17 +41,19 @@ exports.studyService = {
             },
             include: { subject: true },
         });
-    },
+    }
     async update(id, data) {
-        return prisma_js_1.prisma.study.update({
+        return this.prisma.study.update({
             where: { id },
             data,
             include: { subject: true },
         });
-    },
+    }
     async delete(id) {
-        return prisma_js_1.prisma.study.delete({
+        return this.prisma.study.delete({
             where: { id },
         });
-    },
-};
+    }
+}
+exports.StudyService = StudyService;
+exports.studyService = new StudyService(prisma_1.Prisma);

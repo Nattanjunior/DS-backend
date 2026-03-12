@@ -1,7 +1,10 @@
-import { prisma } from '../lib/prisma.js'
-import { CreateStudyInput, UpdateStudyInput, StudyQuery } from '../schemas/studySchema.js'
+import { PrismaClient } from '@prisma/client'
+import { Prisma } from '../lib/prisma'
+import { CreateStudyInput, UpdateStudyInput, StudyQuery } from '../schemas/studySchema'
 
-export const studyService = {
+export class StudyService {
+  constructor(private prisma: PrismaClient) {}
+
   async findAll(query: StudyQuery) {
     const where: Record<string, unknown> = {}
 
@@ -13,22 +16,22 @@ export const studyService = {
       if (query.dateTo) (where.date as Record<string, Date>).lte = query.dateTo
     }
 
-    return prisma.study.findMany({
+    return this.prisma.study.findMany({
       where,
       include: { subject: true },
       orderBy: { date: 'desc' },
     })
-  },
+  }
 
   async findById(id: string) {
-    return prisma.study.findUnique({
+    return this.prisma.study.findUnique({
       where: { id },
       include: { subject: true },
     })
-  },
+  }
 
   async create(data: CreateStudyInput) {
-    return prisma.study.create({
+    return this.prisma.study.create({
       data: {
         userId: data.userId,
         subjectId: data.subjectId,
@@ -37,19 +40,21 @@ export const studyService = {
       },
       include: { subject: true },
     })
-  },
+  }
 
   async update(id: string, data: UpdateStudyInput) {
-    return prisma.study.update({
+    return this.prisma.study.update({
       where: { id },
       data,
       include: { subject: true },
     })
-  },
+  }
 
   async delete(id: string) {
-    return prisma.study.delete({
+    return this.prisma.study.delete({
       where: { id },
     })
-  },
+  }
 }
+
+export const studyService = new StudyService(Prisma)
