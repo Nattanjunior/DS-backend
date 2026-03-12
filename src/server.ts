@@ -1,13 +1,15 @@
 import Fastify from 'fastify'
 import cors from '@fastify/cors'
+import 'dotenv/config'
 import fastifyJwt from '@fastify/jwt'
 import rateLimit from '@fastify/rate-limit'
-import { subjectRoutes } from './routes/subjectRoutes.js'
-import { studyRoutes } from './routes/studyRoutes.js'
-import { goalRoutes } from './routes/goalRoutes.js'
-import { noteRoutes } from './routes/noteRoutes.js'
-import { userRoutes } from './routes/userRoutes.js'
-import { authRoutes } from './routes/authRoutes.js'
+import { validatorCompiler, serializerCompiler } from 'fastify-type-provider-zod'
+import { subjectRoutes } from './routes/subjectRoutes'
+import { studyRoutes } from './routes/studyRoutes'
+import { goalRoutes } from './routes/goalRoutes'
+import { noteRoutes } from './routes/noteRoutes'
+import { userRoutes } from './routes/userRoutes'
+import { authRoutes } from './routes/authRoutes'
 
 declare module '@fastify/jwt' {
   interface FastifyJWT {
@@ -45,6 +47,9 @@ const app = Fastify({
       },
 })
 
+app.setValidatorCompiler(validatorCompiler)
+app.setSerializerCompiler(serializerCompiler)
+
 async function start() {
   if (!process.env.JWT_SECRET) {
     throw new Error('JWT_SECRET environment variable is required')
@@ -73,6 +78,9 @@ async function start() {
 
   await app.register(fastifyJwt, {
     secret: process.env.JWT_SECRET,
+    sign:{
+      expiresIn: "7d"
+    }
   })
 
   await app.register(authRoutes, { prefix: '/auth' })
