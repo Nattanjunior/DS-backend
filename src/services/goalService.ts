@@ -1,7 +1,10 @@
-import { prisma } from '../lib/prisma.js'
-import { CreateGoalInput, UpdateGoalInput, GoalQuery } from '../schemas/goalSchema.js'
+import { PrismaClient } from '@prisma/client'
+import { Prisma } from '../lib/prisma'
+import { CreateGoalInput, UpdateGoalInput, GoalQuery } from '../schemas/goalSchema'
 
-export const goalService = {
+export class GoalService {
+  constructor(private prisma: PrismaClient) {}
+
   async findAll(query: GoalQuery) {
     const where: Record<string, unknown> = {}
 
@@ -14,7 +17,7 @@ export const goalService = {
       if (query.endDate) (where.endDate as Record<string, Date>).gte = query.endDate
     }
 
-    return prisma.goal.findMany({
+    return this.prisma.goal.findMany({
       where,
       include: {
         days: {
@@ -27,10 +30,10 @@ export const goalService = {
       },
       orderBy: { startDate: 'desc' },
     })
-  },
+  }
 
   async findById(id: string) {
-    return prisma.goal.findUnique({
+    return this.prisma.goal.findUnique({
       where: { id },
       include: {
         days: {
@@ -42,12 +45,12 @@ export const goalService = {
         },
       },
     })
-  },
+  }
 
   async create(data: CreateGoalInput) {
     const { userId, type, totalHours, startDate, endDate, days } = data
 
-    return prisma.goal.create({
+    return this.prisma.goal.create({
       data: {
         userId,
         type,
@@ -78,21 +81,21 @@ export const goalService = {
         },
       },
     })
-  },
+  }
 
   async update(id: string, data: UpdateGoalInput) {
     const { type, totalHours, startDate, endDate, days } = data
 
     if (days) {
-      await prisma.goalDaySubject.deleteMany({
+      await this.prisma.goalDaySubject.deleteMany({
         where: { goalDay: { goalId: id } },
       })
-      await prisma.goalDay.deleteMany({
+      await this.prisma.goalDay.deleteMany({
         where: { goalId: id },
       })
     }
 
-    return prisma.goal.update({
+    return this.prisma.goal.update({
       where: { id },
       data: {
         type,
@@ -125,17 +128,19 @@ export const goalService = {
         },
       },
     })
-  },
+  }
 
   async delete(id: string) {
-    await prisma.goalDaySubject.deleteMany({
+    await this.prisma.goalDaySubject.deleteMany({
       where: { goalDay: { goalId: id } },
     })
-    await prisma.goalDay.deleteMany({
+    await this.prisma.goalDay.deleteMany({
       where: { goalId: id },
     })
-    return prisma.goal.delete({
+    return this.prisma.goal.delete({
       where: { id },
     })
-  },
+  }
 }
+
+export const goalService = new GoalService(Prisma)

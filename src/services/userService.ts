@@ -1,10 +1,13 @@
-import { prisma } from '../lib/prisma.js'
-import { CreateUserInput, UpdateUserInput, UserQuery } from '../schemas/userSchema.js'
+import { PrismaClient } from '@prisma/client'
+import { Prisma } from '../lib/prisma'
+import { CreateUserInput, UpdateUserInput, UserQuery } from '../schemas/userSchema'
 import bcrypt from 'bcrypt'
 
 const SALT_ROUNDS = 10
 
-export const userService = {
+export class UserService {
+  constructor(private prisma: PrismaClient) {}
+
   async findAll(query: UserQuery) {
     const where: Record<string, unknown> = {}
 
@@ -17,14 +20,14 @@ export const userService = {
       if (query.createdAtTo) (where.createdAt as Record<string, Date>).lte = query.createdAtTo
     }
 
-    return prisma.user.findMany({
+    return this.prisma.user.findMany({
       where,
       orderBy: { createdAt: 'desc' },
     })
-  },
+  }
 
   async findById(id: string) {
-    return prisma.user.findUnique({
+    return this.prisma.user.findUnique({
       where: { id },
       include: {
         subjects: true,
@@ -33,64 +36,66 @@ export const userService = {
         notes: true,
       },
     })
-  },
+  }
 
   async findByEmail(email: string) {
-    return prisma.user.findUnique({
+    return this.prisma.user.findUnique({
       where: { email },
     })
-  },
+  }
 
   async findByEmailWithPassword(email: string) {
-    return prisma.user.findUnique({
+    return this.prisma.user.findUnique({
       where: { email },
     })
-  },
+  }
 
   async hashPassword(password: string): Promise<string> {
     return bcrypt.hash(password, SALT_ROUNDS)
-  },
+  }
 
   async comparePassword(password: string, hash: string): Promise<boolean> {
     return bcrypt.compare(password, hash)
-  },
+  }
 
   async create(data: CreateUserInput) {
-    return prisma.user.create({
+    return this.prisma.user.create({
       data: {
         email: data.email,
       },
     })
-  },
+  }
 
   async createWithPassword(email: string, password: string) {
     const hashedPassword = await this.hashPassword(password)
-    return prisma.user.create({
+    return this.prisma.user.create({
       data: {
         email,
         password: hashedPassword,
       },
     })
-  },
+  }
 
   async update(id: string, data: UpdateUserInput) {
-    return prisma.user.update({
+    return this.prisma.user.update({
       where: { id },
       data,
     })
-  },
+  }
 
   async delete(id: string) {
-    return prisma.user.delete({
+    return this.prisma.user.delete({
       where: { id },
     })
-  },
+  }
 
   async updatePassword(id: string, newPassword: string) {
     const hashedPassword = await this.hashPassword(newPassword)
-    return prisma.user.update({
+    return this.prisma.user.update({
       where: { id },
       data: { password: hashedPassword },
     })
-  },
+  }
 }
+
+export const userService = new UserService(Prisma)
